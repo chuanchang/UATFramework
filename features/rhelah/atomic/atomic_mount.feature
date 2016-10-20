@@ -32,7 +32,7 @@ Background: Atomic hosts are discovered
   @run_rhel7_in_bg
   Scenario: 6. docker run rhel7 with detach mode
        When docker run "registry.access.redhat.com/rhel7" in detach mode with "mount_test" "top -b"
-       Then find latest created container by name "mount_test"
+       Then find latest created container by "mount_test"
 
   @mount_container_without_option
   Scenario: 7. mount running container by name to a specified directory

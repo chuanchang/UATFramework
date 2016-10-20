@@ -1,4 +1,4 @@
-#@atomic @host_subscribed @ah_upgrade
+@atomic @host_subscribed @ah_upgrade
 Feature: Atomic scanner test
     Describes the basic 'atomic scan' command test
 
@@ -73,12 +73,12 @@ Background: Atomic hosts are discovered
   @run_container1_in_bg
   Scenario: 13. docker run container1 with detach mode
        When docker run "centos" in detach mode with "C1" "top -b"
-       Then find latest created container by name "C1"
+       Then find latest created container by "C1"
 
   @run_container2_in_bg
   Scenario: 14. docker run container2 with detach mode
        When docker run "rhel7" in detach mode with "C2" "top -b"
-       Then find latest created container by name "C2"
+       Then find latest created container by "C2"
 
   @scan_containers
   Scenario: 15. scan containers

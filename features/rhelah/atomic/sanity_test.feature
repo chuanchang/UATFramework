@@ -28,7 +28,7 @@ Background: Atomic hosts are discovered
   @run_container_in_bg
   Scenario: 5. docker run centos with detach mode
        When docker run "centos" in detach mode with "mount_test" "top -b"
-       Then find latest created container by name "mount_test"
+       Then find latest created container by "mount_test"
 
   @mount_container_to_path
   Scenario: 6. mount running container by name to a specified directory
