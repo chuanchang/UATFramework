@@ -6,7 +6,8 @@ import time
 import filecmp
 from behave import *
 from distutils.version import LooseVersion
-from docker import get_image_id_by_name, get_running_container_id, string_to_bool
+from docker import get_image_id_by_name, get_containers_id
+from docker import string_to_bool, get_container_id_by_name
 from ostree import get_ostree_admin_status
 
 
@@ -19,6 +20,7 @@ def get_atomic_version(context):
             break
 
     return atomic_version
+
 
 def get_atomic_status(context):
     status_result = context.remote_cmd(cmd='command',
@@ -476,7 +478,7 @@ def step_impl(context, name=None):
     if name is not None:
         container = name
     else:
-        container = get_running_container_id(context)
+        container = get_containers_id(context)
     assert container, "No running container"
     assert context.remote_cmd('command',
                               module_args='atomic stop %s' % container)
@@ -810,3 +812,44 @@ def step_impl(context, target_file="/usr/unlock_test"):
     mkfile = context.remote_cmd('file',
                                 module_args='path=%s state=touch' % target_file)
     assert mkfile, "Failed to create %s" % target_file
+
+@when(u'export containers and associated contents into "{path}"')
+@when(u'export containers and running docker at a custom location "{graph}"')
+@when(u'export containers and associated contents into default directory')
+@when(u'from custom running docker location "{graph}" exporting containers and associated contents into "{path}"')
+def step_impl(context, path="/var/lib/atomic/migrate", graph="/var/lib/docker"):
+    '''Export containers and associated contents into a filesystem directory'''
+    options = ""
+    options += "--dir %s --graph %s" % (path, graph)
+    assert context.remote_cmd(cmd='command',
+                              module_args='atomic storage export %s' % options)
+
+@when(u'import containers and associated contents from "{path}"')
+@when(u'import containers and running docker at a custom location "{graph}"')
+@when(u'import containers and associated contents from default directory')
+@when(u'from custom running docker location "{graph}" and "{path}" importing containers and associated contents')
+def step_impl(context, path="/var/lib/atomic/migrate", graph="/var/lib/docker"):
+    '''Import containers and associated contents from a filesystem directory'''
+    options = ""
+    options += "--dir %s --graph %s" % (path, graph)
+    assert context.remote_cmd(cmd='shell',
+                              module_args="atomic -y storage import %s" % options)
+
+@then(u'check image "{image}" have been imported')
+def step_impl(context, image):
+    '''Check if image is imported'''
+    context.execute_steps(u"""
+        Then check whether "{image}" is installed
+            """.format(image=image))
+
+@then(u'check container "{container}" have been imported')
+def step_impl(context, container, path="/var/lib/atomic/migrate"):
+    '''Check if container is imported'''
+    container_id = get_container_id_by_name(context, container)
+    assert container_id, "Error can't find container: %s" % container
+
+@when(u'reset storage to its initial configuration')
+def step_impl(context):
+    '''Reset storage to its initial configuration'''
+    assert context.remote_cmd(cmd='command',
+                              module_args='atomic storage reset')

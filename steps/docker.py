@@ -6,10 +6,13 @@ from behave import *
 from common import string_to_bool
 
 
-def get_running_container_id(context):
-    '''get running container id'''
+def get_containers_id(context, state="active"):
+    '''get running containers id'''
+    cmd = "docker ps"
+    if state == "inactive":
+        cmd += " -a"
     container_result = context.remote_cmd(cmd='command',
-                                          module_args='docker ps')
+                                          module_args=cmd)
 
     assert container_result, "Error running 'docker ps'"
 
@@ -29,6 +32,13 @@ def get_running_container_id(context):
                 container_id = m.group('container')
 
     return container_id
+
+def get_container_id_by_name(context, name):
+    '''get container id by name'''
+    container_id = context.remote_cmd(cmd='command',
+                                      module_args='docker ps -aq -f name=%s' % name)
+    assert not container_id is False, context.result['contacted']
+    return container_id[0]['stdout']
 
 def get_images_id(context):
     '''get images id'''
@@ -65,7 +75,7 @@ def step_impl(context, rpm, image, host):
 @when('docker stop container')
 def step_impl(context):
     '''docker stop container'''
-    container_id = get_running_container_id(context)
+    container_id = get_containers_id(context)
     assert container_id, "There is not a running container"
     assert context.remote_cmd('command',
                                module_args='docker stop %s' % container_id)
@@ -88,7 +98,7 @@ def step_impl(context, image, command, ignore_rc="false", bg="true", name="", op
     if option:
         options += option
     options += ' ' + image + ' ' + command
-    module_args='docker run %s' % options
+    module_args = 'docker run %s' % options
     context.docker_run_result = context.remote_cmd('command',
                                                    ignore_rc=ignore_rc,
                                                    module_args=module_args)
@@ -97,14 +107,14 @@ def step_impl(context, image, command, ignore_rc="false", bg="true", name="", op
 @then('check whether there is a running container')
 def step_impl(context):
     '''check whether container is running'''
-    container_id = get_running_container_id(context)
+    container_id = get_containers_id(context)
     assert container_id, "There is not a running container"
 
-@then('find latest created container by name "{name}"')
+@then('find latest created container by "{condition}"')
 def step_impl(context, name):
-    '''find latest created container by name'''
+    '''find latest created container by condition'''
     assert context.remote_cmd('shell',
-                              module_args='docker ps -l | grep %s' % name)
+                              module_args='docker ps -al | grep %s' % condition)
 
 @then('check if "{matches}" is in result of docker run')
 def step_impl(context, matches):
@@ -150,3 +160,4 @@ def step_impl(context):
     '''Remove all of containers'''
     assert context.remote_cmd('shell',
                               module_args='docker ps -a -q | xargs -r docker rm')
+
