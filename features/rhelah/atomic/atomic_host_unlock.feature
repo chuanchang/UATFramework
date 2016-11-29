@@ -51,7 +51,7 @@ Background: Atomic hosts are discovered
        and run command "shell ls /usr/unlock_hotfix_test"
 
   @rollback_host
-    Scenario: 7. Rollback to the original deployment
+  Scenario: 7. Rollback to the original deployment
       When atomic host rollback is successful
        and wait "60" seconds for "all" to reboot
       Then check whether mount option "overlay /usr overlay rw" does not exist
