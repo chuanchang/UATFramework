@@ -1,4 +1,4 @@
-#@atomic @host_subscribed @ah_upgrade
+@atomic @host_subscribed @ah_upgrade
 Feature: Atomic scanner test
     Describes the basic 'atomic scan' command test
 

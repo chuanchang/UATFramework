@@ -110,7 +110,7 @@ Background: Atomic hosts are discovered
 
   @check_remote_image_label
   Scenario: 22. Display label information about a remote image
-       When Display LABEL information about a "remote" image "registry.access.redhat.com/rhel7"
+       When Display LABEL information about a "remote" image "rhel7"
        Then Check LABEL "Vendor: Red Hat, Inc." information for an image
 
   @remove_all_containers
@@ -144,7 +144,7 @@ Background: Atomic hosts are discovered
 
   @rollback_host
   Scenario: 29. Rollback to the original deployment
-      Given there is "2" atomic host tree deployed
+       Given there is "2" atomic host tree deployed
         and the original atomic version has been recorded
        When atomic host rollback is successful
         and wait "60" seconds for "all" to reboot
